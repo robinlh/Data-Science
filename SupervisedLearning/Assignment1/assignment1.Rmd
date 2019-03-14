@@ -1,0 +1,38 @@
+Question 1
+
+a) splitting data into training and testing sets. Performing multiple linear regression on test set to obtain coeffs. Using coeffs to predict linear model. Applying linear model to test set, determining MSE.
+```{r}
+my_data = read.csv("my_boston.csv")
+my_data = my_data[,-1]
+
+# fitting lm model to all predictor vars
+mlr_train = lm(medv ~ ., data = my_data[1:350, ])
+
+# model prediction for training set
+train_predictions = predict(mlr_train, newdata = my_data[(1:350), -which(names(my_data) == "medv")]); train_predictions
+
+# model prediction for test set
+test_predictions = predict(mlr_train, newdata = my_data[-(1:350), -which(names(my_data) == "medv")]); test_predictions
+
+plot(train_predictions)
+plot(test_predictions)
+
+# vector for observations in medv (y)
+medv = my_data$medv
+
+# error in training set
+train_err = medv[1:350]-train_predictions
+train_rmse = sqrt(mean(train_err^2))
+
+# error in test set
+test_err = medv[-(1:350)]-test_predictions
+test_rmse = sqrt(mean(test_err^2))
+
+# coefficients for mlr model
+coeffs = mlr_train$coefficients; coeffs
+```
+b)
+```{r}
+
+```
+
