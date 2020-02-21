@@ -1,0 +1,2 @@
+This repository contains a program that models vegetation species changes over a 70 year period using raster data. 
+The automated model optimises the sequential operations using parallel processing.

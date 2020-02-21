@@ -1,0 +1,36 @@
+Tue May 22 14:20:50 PDT 2018
+MaxEnt version 3.3.3k
+Reading file absence
+readGrid: max memory 484442112, total allocated 484442112, free 445058592, used 39383520, increment -46892312
+Reading samples from presence
+Read samples: max memory 484442112, total allocated 484442112, free 406408560, used 78033552, increment 38650032
+Adding samples to background in feature space
+Command line used:  autorun -e C:/RAIDa/proehrdanz/Proteaceae/Leucadendron argenteum/Soils_cape_no8/absence -o C:/RAIDa/proehrdanz/Proteaceae/Leucadendron argenteum/Soils_cape_no8 -s C:/RAIDa/proehrdanz/Proteaceae/Leucadendron argenteum/Soils_cape_no8/presence -z nothreshold replicates=1 -p -x maximumbackground=10000
+Command line to repeat: java density.MaxEnt nowarnings noprefixes "outputdirectory=C:/RAIDa/proehrdanz/Proteaceae/Leucadendron argenteum/Soils_cape_no8" "samplesfile=C:/RAIDa/proehrdanz/Proteaceae/Leucadendron argenteum/Soils_cape_no8/presence" "environmentallayers=C:/RAIDa/proehrdanz/Proteaceae/Leucadendron argenteum/Soils_cape_no8/absence" noproduct nothreshold autorun novisible nooutputgrids
+Species: species
+Layers: bd bio1 bio12 bio15 bio2 bio4 bio6 cec clay dep ph sand soc
+Layertypes: Continuous Continuous Continuous Continuous Continuous Continuous Continuous Continuous Continuous Continuous Continuous Continuous Continuous
+outputdirectory: C:/RAIDa/proehrdanz/Proteaceae/Leucadendron argenteum/Soils_cape_no8
+samplesfile: C:/RAIDa/proehrdanz/Proteaceae/Leucadendron argenteum/Soils_cape_no8/presence
+environmentallayers: C:/RAIDa/proehrdanz/Proteaceae/Leucadendron argenteum/Soils_cape_no8/absence
+product: false
+threshold: false
+autorun: true
+visible: false
+outputgrids: false
+
+getSamples: max memory 484442112, total allocated 484442112, free 406408560, used 78033552, increment 0
+Making features
+makeFeatures: max memory 484442112, total allocated 484442112, free 403061960, used 81380152, increment 3346600
+species: 
+Regularization values: linear/quadratic/product: 0.671, categorical: 0.393, threshold: 1.870, hinge: 0.500
+13 samples
+Density: max memory 484442112, total allocated 484442112, free 400834976, used 83607136, increment 2226984
+linearPredictor: max memory 484442112, total allocated 484442112, free 400834976, used 83607136, increment 0
+FeaturedSpace: max memory 484442112, total allocated 484442112, free 400834976, used 83607136, increment 0
+Sequential: max memory 484442112, total allocated 484442112, free 400834976, used 83607136, increment 0
+Initial loss: 9.207636720401869
+180: time = 0.374000 loss = 7.010705
+Resulting gain: 2.196931537257372
+Time since start: 1.363
+Ending

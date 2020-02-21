@@ -1,0 +1,37 @@
+Tue May 22 16:54:23 PDT 2018
+MaxEnt version 3.3.3k
+Reading file absence
+readGrid: max memory 477626368, total allocated 432013312, free 226761760, used 205251552, increment -26953424
+Reading samples from presence
+Read samples: max memory 477626368, total allocated 432537600, free 253464008, used 179073592, increment -26177960
+Adding samples to background in feature space
+Command line used:  autorun -e C:/RAIDa/proehrdanz/Proteaceae/Protea compacta/Soils_cape_no8/absence -o C:/RAIDa/proehrdanz/Proteaceae/Protea compacta/Soils_cape_no8 -s C:/RAIDa/proehrdanz/Proteaceae/Protea compacta/Soils_cape_no8/presence -z nothreshold replicates=1 -p -x maximumbackground=10000
+Command line to repeat: java density.MaxEnt nowarnings noprefixes "outputdirectory=C:/RAIDa/proehrdanz/Proteaceae/Protea compacta/Soils_cape_no8" "samplesfile=C:/RAIDa/proehrdanz/Proteaceae/Protea compacta/Soils_cape_no8/presence" "environmentallayers=C:/RAIDa/proehrdanz/Proteaceae/Protea compacta/Soils_cape_no8/absence" noproduct nothreshold autorun novisible nooutputgrids
+Species: species
+Layers: bd bio1 bio12 bio15 bio2 bio4 bio6 cec clay dep ph sand soc
+Layertypes: Continuous Continuous Continuous Continuous Continuous Continuous Continuous Continuous Continuous Continuous Continuous Continuous Continuous
+outputdirectory: C:/RAIDa/proehrdanz/Proteaceae/Protea compacta/Soils_cape_no8
+samplesfile: C:/RAIDa/proehrdanz/Proteaceae/Protea compacta/Soils_cape_no8/presence
+environmentallayers: C:/RAIDa/proehrdanz/Proteaceae/Protea compacta/Soils_cape_no8/absence
+product: false
+threshold: false
+autorun: true
+visible: false
+outputgrids: false
+
+getSamples: max memory 477626368, total allocated 432537600, free 252575752, used 179961848, increment 888256
+Making features
+makeFeatures: max memory 477626368, total allocated 432537600, free 250976712, used 181560888, increment 1599040
+species: 
+Regularization values: linear/quadratic/product: 0.224, categorical: 0.250, threshold: 1.610, hinge: 0.500
+39 samples
+Density: max memory 477626368, total allocated 432537600, free 239848792, used 192688808, increment 11127920
+linearPredictor: max memory 477626368, total allocated 432537600, free 239848792, used 192688808, increment 0
+FeaturedSpace: max memory 477626368, total allocated 432537600, free 239848792, used 192688808, increment 0
+Sequential: max memory 477626368, total allocated 432537600, free 239848792, used 192688808, increment 0
+Initial loss: 9.209540051805414
+Time since start: 11.009
+500: time = 10.318000 loss = 6.885542
+Resulting gain: 2.323998526868704
+Time since start: 13.306
+Ending

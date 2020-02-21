@@ -1,0 +1,250 @@
+---
+title: "Automated range"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+############################################################################ ##
+## Load packages and world shapefile                                       ####
+############################################################################ ##
+library(stringr)
+require(spatial.tools)
+require(tidyverse)
+library(maptools)
+require(here)
+library(raster)
+library(rgdal)
+require(plotrix)
+library(viridis)
+library(dplyr)
+library(plyr)
+library(foreach)
+library(doParallel)
+worldshp = data(wrld_simpl)
+options(scipen = 999)
+```
+
+```{r}
+# FUNCTIONS
+
+# function to perform comparison calculations for all models
+# can perform calculations between any time periods
+# Parameter list:
+## models = list of models
+## species = list of file names in which different species data is stored in
+## country = shapefile object
+## time1/time2 = current/2040/2070
+## current_raster = boolean (if True, calculations performed using current raster for time1)
+single_species_comparison = function(models, species, country, time1, time2, current_raster){
+  
+  # create data frame to store 6 values for 5 models
+  df = data.frame(matrix(rep(0,30),nrow = 6, ncol = 5))
+  
+  # if not a current raster calculation
+  if (current_raster == F){
+      for (i in 1:length(models)){
+        
+      # raster extractions performed in loop for both 2040/2070
+      tif_current = raster(paste0("Spec/",species,"/Soils_cape_no8/",species,"_",models[i],time1,"_bin_50.tif"))
+      tif_comparison_bin = raster(paste0("Spec/",species,"/Soils_cape_no8/",species,"_",models[i],time2,"_bin_50.tif"))
+      
+      #masking the 2070 with other .tif in order to get rid of NAs
+      tif_comparison_bin = mask(tif_comparison_bin,tif_current)
+      
+      # call to main calculation function
+      col = body_calculation(country, tif_current, tif_comparison_bin)
+      df[,i] = col
+      }
+  # if current raster calculation
+  } else {
+    
+    # current raster called outside loop
+    tif_current = raster(paste0("Spec/",species,"/Soils_cape_no8/",species,"_current_bin_50.tif"))
+    for (i in 1:length(models)){
+      
+      # Raster for future distribution
+      tif_comparison_bin = raster(paste0("Spec/",species,"/Soils_cape_no8/",species,"_",models[i],time2,"_bin_50.tif"))
+      
+      #masking the 2070 with other .tif in order to get rid of NAs
+      tif_comparison_bin = mask(tif_comparison_bin,tif_current)
+      
+      col = body_calculation(country, tif_current, tif_comparison_bin)
+      df[,i] = col
+    }
+  }
+  
+  # returns data frame with 6 values for 5 models (6x5 dimensions)
+  return(df)
+}
+
+# main calculation function, don't need this code repeated because it's long
+body_calculation = function(country, tif_current, tif_comparison_bin){
+  
+  df_item = rep(0,6)
+  
+  spp <- stack(tif_current,tif_comparison_bin)
+  spp_selected_country <- mask(crop(spp,extent(country)),country)
+  
+  ## Create Table for Proportion Changes
+  Prop <- as.data.frame(cellStats(spp_selected_country,stat = 'sum'))
+  colnames(Prop) <- "Presence"
+  Prop$Total <- (ncell(spp_selected_country))
+  Prop$Percentage <- as.integer((Prop$Presence/Prop$Total)*100)
+  rownames(Prop)<-c("Current","Future")
+  Prop <- t(Prop)
+  
+  
+  ############################################################################ ##
+  ## Transition between current and future range                             ####
+  ############################################################################ ##
+  
+  ## Create matrix for classification
+  m <- matrix(c(-Inf,0,0,0,13,1,13,20,2,20,23,4,23,Inf,3),
+              ncol=3,byrow=TRUE)
+  ## Create values for transition classification
+  curr_spp_country = (spp_selected_country[[1]]+1)*2
+  fut_spp_country = (spp_selected_country[[2]]+1)*10
+  curr_fut_country =curr_spp_country+fut_spp_country
+  curr_fut_clas_country <- reclassify(curr_fut_country,m)
+  ## Plot country transition map
+  #plot(curr_fut_clas_country)
+  #plot(country,add=TRUE)
+  
+  ## Stack current, future and transition maps
+  spp_country_tran <- stack(spp_selected_country,curr_fut_clas_country)
+  
+  ## Plot current, future and transition maps
+  ## And display table of current, future and transition values
+  
+  breaks <- seq(0.5, 4.5, by = 1)
+  cols <- viridis(length(breaks)-1)
+  
+  # par(mfrow = c(2,2))
+  # plot(spp_country_tran[[1]],main = "Current")
+  # plot(spp_country_tran[[2]],main = "Future")
+  # plot(spp_country_tran[[3]],breaks = breaks, col = cols,main = "Range Shift")
+  
+  #plot(spp_country_tran,breaks = breaks, col = cols, main = c("Current","Future","Range Shift"))
+  
+  
+  # addtable2plot(1 ,-100,Prop,bty="o",display.rownames=TRUE,hlines=TRUE,
+  #               vlines=TRUE)
+  
+  #####
+  kuduhist <- data.frame(rasterToPoints(spp_country_tran))
+  kuduhist$layer <- as.factor(kuduhist$layer)
+  
+  #Presence in time 1
+  df_item[1] = (sum(kuduhist[3])/(dplyr::count(kuduhist[3]))*100)[[1]]
+  #Presence in time 2
+  df_item[2] = (sum(kuduhist[4]))/(dplyr::count(kuduhist[3])*100)[[1]]
+  
+  #Use values in summary to plug into following
+  kudsum <- summary(kuduhist)
+  print(kudsum)
+  
+  #Use values 1, 2, 3 and 4 from summary to work out following
+  
+  #1 Total number absent and still absent
+  df_item[3] = (as.numeric(trimws(sub(".*:","",kudsum[1,5])))/(dplyr::count(kuduhist[3]))*100)[[1]]
+  
+  #2 % Loss from time diff
+  df_item[4] = (as.numeric(trimws(sub(".*:","",kudsum[2,5])))/(dplyr::count(kuduhist[3]))*100)[[1]]
+  
+  #3 % There in both time periods or range overlap
+  df_item[5] = (as.numeric(trimws(sub(".*:","",kudsum[3,5])))/(dplyr::count(kuduhist[3]))*100)[[1]]
+  
+  #4 % gain in time period
+  df_item[6] = (as.numeric(trimws(sub(".*:","",kudsum[4,5])))/(dplyr::count(kuduhist[3]))*100)[[1]]
+  
+  # returns 6 values as vector
+  return(df_item)
+}
+```
+
+Calculate stuff
+```{r}
+#set up function inputs
+country = shapefile("sa_PROVINCE__WESTERN CAPE.shp")
+models = c("cc","cn","gf","he","mp")
+files = list.files(path = "/home/robinh/Masters/Namita/SDMs/Spec/")
+
+
+# make cluster
+cl =  makeCluster(max(1,detectCores()-1)) 
+
+## Initiate cluster
+registerDoParallel(cl)
+
+# current/2040
+ptm = proc.time()
+res_current_2040 = foreach(j = 1:length(files),.packages=c('raster', 'viridis'), .combine = rbind) %dopar% {
+    single_species_comparison(models,files[j], country, current, 2040, T)
+}
+calc1 = proc.time()-ptm
+colnames(res_current_2040) = models
+
+# current/2070
+ptm = proc.time()
+res_current_2070 = foreach(j = 1:length(files),.packages=c('raster', 'viridis'), .combine = rbind) %dopar% {
+    single_species_comparison(models,files[j], country, current, 2070, T)
+}
+calc2 = proc.time()-ptm
+colnames(res_current_2070) = models
+
+# 2040/2070
+ptm = proc.time()
+res_2040_2070 = foreach(j = 1:length(files),.packages=c('raster', 'viridis'), .combine = rbind) %dopar% {
+    single_species_comparison(models,files[j], country, 2040, 2070, F)
+}
+calc3 = proc.time()-ptm
+colnames(res_2040_2070) = models
+
+
+stopCluster(cl)
+# massive reduction in CPU usage, and cutting the loop time in half on my machine. 
+```
+
+
+```{r}
+res_current_2040
+calc1
+```
+
+```{r}
+res_current_2070
+calc1
+```
+
+```{r}
+res_2040_2070
+calc3
+```
+
+```{r}
+res = single_species_comparison(models, files[2], country, 2040, 2070, F)
+```
+
+
+```{r}
+list = ""
+put_names = function(files, list){
+  for (g in 1:length(files)){
+    file_names = rep(files[g],6)
+    list = c(list, file_names)
+  }
+  list = list[-1]
+  return(list)
+}
+
+test = put_names(files, list)
+```
+
+```{r}
+
+```
+
